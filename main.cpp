@@ -1,12 +1,13 @@
 #include <iostream> // for strings
-#include <vector> // for dynamic array behavior
 #include <cstdlib> // for std::rand() and std::srand()
 #include <ctime> // for std::time()
 
 //CONSTANTS
-const int PROG_INDEX = 16;
+
 const int MAJOR_KEY[] = {0, 2, 4, 5, 7, 9, 11},
 		  MINOR_KEY[] = {0, 2, 3, 5, 7, 8, 10};
+
+const int PROG_INDEX = 16; //number of chord progressions
 const int PROG[PROG_INDEX][5] //List of chord progressions
 {
 	{1, 5, 6, 4, 0},
@@ -45,6 +46,14 @@ enum Note
 	NOTE_GSHARP	//11
 };
 
+enum Section
+{
+	SECTION_INTRO,
+	SECTION_VERSE,
+	SECTION_PRECHORUS,
+	SECTION_CHORUS,
+	SECTION_BRIDGE
+};
 /*-----------------------FUNCTIONS-------------------------*/
 
 // Generate a random number between 1 and max (inclusive)
@@ -95,6 +104,47 @@ bool isKeySharp(int key)
 	
 	else
 		return false;
+}
+
+void outputSection(int section)
+{
+	std::string text = "";
+	
+	Section secCast = static_cast<Section>(section);
+	
+	switch(secCast)
+	{
+		case SECTION_INTRO:
+			text = "Intro";
+			break;
+		case SECTION_VERSE:
+			text = "Verse";
+			break;
+		case SECTION_CHORUS:
+			text = "Chorus";
+			break;
+		case SECTION_PRECHORUS:
+			text = "Prechorus";
+			break;
+		case SECTION_BRIDGE:
+			text = "Bridge";
+			break;
+		default:
+			std::cout << "ERROR IN void outputProgression()";
+
+			
+	}
+	
+	std::cout << text << ":\n";
+}
+
+int progToInt(int random, const int progression[][5], Note scale, int chordNum)
+{
+	int noteCast = static_cast<int>(scale);
+	noteCast += progression[random][chordNum];
+	if (noteCast > 6)
+		noteCast -= 7;
+	return noteCast;		
 }
 
 //Equates the user's input to a key
