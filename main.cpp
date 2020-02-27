@@ -10,22 +10,22 @@ const int MAJOR_KEY[] = {0, 2, 4, 5, 7, 9, 11},
 const int PROG_INDEX = 16; //number of chord progressions
 const int PROG[PROG_INDEX][5] //List of chord progressions
 {
-	{1, 5, 6, 4, 0},
+	{1, 5, 6, 4, -1}, //0,   -1 = NULL
 	{1, 5, 6, 3, 4},
-	{6, 5, 4, 5, 0},
-	{1, 6, 4, 5, 0},
-	{1, 4, 6, 5, 0},
-	{1, 5, 4, 5, 0},
+	{6, 5, 4, 5, -1},
+	{1, 6, 4, 5, -1},
+	{1, 4, 6, 5, -1},
+	{1, 5, 4, 5, -1}, //5
 	{4, 2, 1, 5, 1},
-	{1, 5, 6, 5, 0},
-	{1, 2, 1, 4, 0},
-	{1, 3, 6, 4, 0},
-	{4, 1, 5, 99, 0},
-	{4, 1, 2, 5, 0},
-	{4, 5, 13, 6, 0}, //Toggle Major/Minor?? (-10 at output)
-	{1, 13, 6, 99, 0},
-	{1, 21, 4, 5, 0}, //Dominant?? (-20 at output)
-	{4, 14, 1, 99, 0} //99 = "Add your own!"
+	{1, 5, 6, 5, -1},
+	{1, 2, 1, 4, -1},
+	{1, 3, 6, 4, -1},
+	{4, 1, 5, -2, -1}, //10
+	{4, 1, 2, 5, -1},
+	{4, 5, 13, 6, -1}, //Toggle Major/Minor?? (-10 at output)
+	{1, 13, 6, -2, -1},
+	{1, 21, 4, 5, -1}, //Dominant?? (-20 at output)
+	{4, 14, 1, -2, -1} //-2 = "Add your own!"
 	
 };
 
@@ -43,7 +43,9 @@ enum Note
 	NOTE_F,		//8
 	NOTE_FSHARP,	//9
 	NOTE_G,		//10
-	NOTE_GSHARP	//11
+	NOTE_GSHARP,	//11
+	NOTE_NULL = -1,
+	NOTE_OTHER = -2
 };
 
 enum Section
@@ -138,12 +140,42 @@ void printSection(int section)
 	std::cout << text << ":\n";
 }
 
-int progToInt(int random, const int progression[][5], Note scale, int chordNum)
+int progToInt(int random, const int progression[][5], Note scale[7], int chordNum, bool 			&isMinor, bool &isDom)
 {
-	int noteCast = static_cast<int>(scale);
-	noteCast += progression[random][chordNum];
-	if (noteCast > 6)
-		noteCast -= 7;
+	
+	int progDeg = progression[random][chordNum];
+	
+	if(progDeg == -1)
+		return -1;
+	
+	if(progDeg == -2)
+		return -2;
+	
+	if (progDeg == 2 || progDeg == 3 || progDeg == 6) //2nd, 3rd, and 6th degree are minor
+		isMinor = true;
+	
+	
+	
+	if (progDeg > 10 && progDeg < 16) //To toggle major/minor, 10 is added in the original array and processed here
+	{
+		progDeg -= 10;
+		
+			if (isMinor == true)
+				isMinor = false;
+			
+			else 
+				isMinor = true;
+		
+	}
+	
+	if (progDeg >= 20 && progDeg < 27)
+	{
+		progDeg -= 20;
+		isDom = true;
+	}
+	
+ 
+	int noteCast = static_cast<int>(scale[ progDeg - 1 ] );
 	return noteCast;		
 }
 
@@ -183,31 +215,14 @@ Note setTonic (int key)
 			
 }
 
-void printChord(int chordInt, bool isSharp, Note chords[7])
+void printChord(int chordInt, bool isSharp, int degree, bool isMinor, bool isDom)
 {
-	bool isMinor;
-	
-	
-	if (chordInt == 1 || chordInt == 2 || chordInt == 5) //2nd, 3rd, and 6th degree are minor
-		isMinor = true;
-	
-	if (chordInt > 10 && chordInt < 18) //To toggle major/minor, 10 is added in the original array and processed here
-	{
-		chordInt -= 10;
-		
-			if (isMinor == true)
-				isMinor = false;
-			
-			else 
-				isMinor = true;
-		
-	}
-	
 	std::string chordName = "";
+	Note chord = static_cast<Note>(chordInt);
 	
 	if (isSharp)
 	{
-		switch (chords[chordInt])
+		switch (chord)
 		{
 			case NOTE_A:
 				chordName = "A";
@@ -245,14 +260,17 @@ void printChord(int chordInt, bool isSharp, Note chords[7])
 			case NOTE_GSHARP:
 				chordName = "G#";
 				break;
+			case NOTE_NULL:
+				chordName = " ";
+				break;
 			default:
-				std::cout << "*"; //Indicates "choose your own" chord
+				chordName = "*";
 		}
 	}
 	
 	else if(!isSharp)
 	{
-		switch (chords[chordInt])
+		switch (chord)
 		{
 			case NOTE_A:
 				chordName = "A";
@@ -290,8 +308,11 @@ void printChord(int chordInt, bool isSharp, Note chords[7])
 			case NOTE_GSHARP:
 				chordName = "Ab";
 				break;
+			case NOTE_NULL:
+				chordName = " ";
+				break;
 			default:
-				std::cout << "(*)"; //indicates "choose your own" chord
+				chordName = "*";
 		}
 	}
 	
@@ -299,6 +320,9 @@ void printChord(int chordInt, bool isSharp, Note chords[7])
 	
 	if(isMinor)
 		std::cout << "m";
+	
+	if(isDom)
+		std::cout << "7";
 }
 
 /*-------------------------------------------MAIN------------------------------------------------*/
@@ -327,9 +351,17 @@ int main()
 		
 		for (int n = 0; n < 5; n++) 
 		{
-			int progID = progToInt(progNumber, PROG, keyTonic, n);//Applies the progression to the key
+			bool isMinor(false), isDom(false);
 			
-			printChord(progID, isSharp, songChords); //Prints the chord
+			int progID = progToInt(progNumber, PROG, songChords, n, isMinor, isDom);//Applies the progression to the key
+			
+			int degree = PROG[progNumber][n]; //the scale degree from the progression
+			
+			printChord(progID, isSharp, degree, isMinor, isDom); //Prints the chord
+			
+			// FOr DEBUG
+			//std::cout << progID << "(" << progNumber << ")"; 
+			//
 			
 			if (n == 4)
 				std::cout << "\n";
