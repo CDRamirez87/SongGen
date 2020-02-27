@@ -106,7 +106,7 @@ bool isKeySharp(int key)
 		return false;
 }
 
-void outputSection(int section)
+void printSection(int section)
 {
 	std::string text = "";
 	
@@ -130,7 +130,7 @@ void outputSection(int section)
 			text = "Bridge";
 			break;
 		default:
-			std::cout << "ERROR IN void outputProgression()";
+			std::cout << "ERROR IN void outputProgression()\n";
 
 			
 	}
@@ -183,6 +183,123 @@ Note setTonic (int key)
 			
 }
 
+void printChord(int chordInt, bool isSharp, Note chords[7])
+{
+	bool isMinor;
+	
+	
+	if (chordInt == 1 || chordInt == 2 || chordInt == 5) //2nd, 3rd, and 6th degree are minor
+		isMinor = true;
+	
+	if (chordInt > 10 && chordInt < 18) //To toggle major/minor, 10 is added in the original array and processed here
+	{
+		chordInt -= 10;
+		
+			if (isMinor == true)
+				isMinor = false;
+			
+			else 
+				isMinor = true;
+		
+	}
+	
+	std::string chordName = "";
+	
+	if (isSharp)
+	{
+		switch (chords[chordInt])
+		{
+			case NOTE_A:
+				chordName = "A";
+				break;
+			case NOTE_ASHARP:
+				chordName = "A#";
+				break;
+			case NOTE_B:
+				chordName = "B";
+				break;
+			case NOTE_C:
+				chordName = "C";
+				break;
+			case NOTE_CSHARP:
+				chordName = "C#";
+				break;
+			case NOTE_D:
+				chordName = "D";
+				break;
+			case NOTE_DSHARP:
+				chordName = "D#";
+				break;
+			case NOTE_E:
+				chordName = "E";
+				break;
+			case NOTE_F:
+				chordName = "F";
+				break;
+			case NOTE_FSHARP:
+				chordName = "F#";
+				break;
+			case NOTE_G:
+				chordName = "G";
+				break;
+			case NOTE_GSHARP:
+				chordName = "G#";
+				break;
+			default:
+				std::cout << "*"; //Indicates "choose your own" chord
+		}
+	}
+	
+	else if(!isSharp)
+	{
+		switch (chords[chordInt])
+		{
+			case NOTE_A:
+				chordName = "A";
+				break;
+			case NOTE_ASHARP:
+				chordName = "Bb";
+				break;
+			case NOTE_B:
+				chordName = "B";
+				break;
+			case NOTE_C:
+				chordName = "C";
+				break;
+			case NOTE_CSHARP:
+				chordName = "Db";
+				break;
+			case NOTE_D:
+				chordName = "D";
+				break;
+			case NOTE_DSHARP:
+				chordName = "Eb";
+				break;
+			case NOTE_E:
+				chordName = "E";
+				break;
+			case NOTE_F:
+				chordName = "F";
+				break;
+			case NOTE_FSHARP:
+				chordName = "Gb";
+				break;
+			case NOTE_G:
+				chordName = "G";
+				break;
+			case NOTE_GSHARP:
+				chordName = "Ab";
+				break;
+			default:
+				std::cout << "(*)"; //indicates "choose your own" chord
+		}
+	}
+	
+	std::cout << chordName;
+	
+	if(isMinor)
+		std::cout << "m";
+}
 
 /*-------------------------------------------MAIN------------------------------------------------*/
 
@@ -201,23 +318,28 @@ int main()
 	
 	bool isSharp = isKeySharp(userKey);
 	
-	//TODO - randomly select chord progressions and traspose them to key, output in sections
-	
-	
+	//Main Algorithm
+	for (int i = 0; i < 5; i++)
+	{
+		printSection(i); //Displays Verse, chorus, etc
 		
-	/*******************************TEST*********************************
+		int progNumber = rollDie(PROG_INDEX); //Choose a random chord progression
+		
+		for (int n = 0; n < 5; n++) 
+		{
+			int progID = progToInt(progNumber, PROG, keyTonic, n);//Applies the progression to the key
+			
+			printChord(progID, isSharp, songChords); //Prints the chord
+			
+			if (n == 4)
+				std::cout << "\n";
+			else
+				std::cout << " ";
+		}
+	}
 	
-	Note dMajor[7];
-	
-	setMajorKey(NOTE_D, dMajor, MAJOR_KEY);
-	
-	for (int i = 0; i < 6; i++)
-		std::cout << dMajor[i] << "\n";
-	
-	*/
-	
-	for (int i = 0; i < 100 ; i++)
-		std::cout << rollDie(6) << "\n";
+	std::cout << "\"*\" means \"choose a chord that sounds good to you\"\nEnjoy your song!\n";
+
 	
 	return 0;
 
